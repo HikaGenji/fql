@@ -1,0 +1,100 @@
+---
+title: "The fql package"
+author: "jperreton@gmail.com"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fql}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE, warning=FALSE, echo=FALSE, results='hide'}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, warning=FALSE, echo=FALSE, results='hide', message=FALSE}
+library(fql)
+```
+
+This package is a collection of verbs that implement a DSL to work with dataframes. It is broadly inspired by [https://code.kx.com/v2/ref/]. FQL stands for Functional Query Language. This library has two dependencies:
+
+* functional
+
+* magrittr
+
+### Meaty Dataframe queries
+
+Let us create a dataset of daily price and volume for ORA and VOD. 
+```{r meaty}
+d <- data.frame(symbol=c(rep("ORA"  , 10), rep("VOD", 10)),
+                date=as.character(rep(seq(as.Date("2019-01-01"),
+                                          9+as.Date("2019-01-01"),by=1), 2)),
+                price=c(14*cumprod(1+0.05*rnorm(10)), 150*cumprod(1+0.05*rnorm(10))),
+                volume=c(cumsum(runif(10)), cumsum(runif(10)))
+                  )
+summary(d)
+
+```
+
+Now let us say that we want to compute the 10-day vwap and the average turnover by symbol:
+```{r vwap}
+d %>%
+update(what=alist(turnover=price*volume)) %>%
+select(by=alist(symbol=symbol),
+       what=alist(turnover=mean(turnover),
+                  vwap=sum(turnover) / sum(volume)))
+```
+
+Now let us say that we have the exchange in a separate table and we want to join it into the result:
+
+```{r lj}
+e <- data.frame(symbol=c("ORA", "VOD"), exchangeid=c(1, 34))
+d %>%
+update(what=alist(turnover=price*volume)) %>%
+select(by=alist(symbol=symbol),
+       what=alist(turnover=mean(turnover),
+                  vwap=sum(turnover) / sum(volume))) %>%
+lj(e %>% xkey("symbol"))
+```
+
+Now let us say we want to compute returns at various horizons. We can achieve it with metaprogramming:
+```{r returnsexp}
+n <- 1:5
+r <- n %>% each(function(k) parse(text=paste("log(price/xprev(price, ", k, "))"))) %>%
+     dict(paste0("r_", n), .)
+head(r, 2)
+```
+Once we have prepared the returns expressions, we can then update d with it:
+```{r returns}
+d %>% 
+update(by=alist(symbol=symbol), what=r) %>%
+tail(5)
+```
+
+### Function Decorators
+
+#### onCall
+
+onCall allows decorating a function and execute a function call right at the start of its evaluation.
+The default handler is to display its arguments.
+
+```{r oncall}
+f <- function(x) x
+g <- onCall(f)
+g(1)
+```
+
+#### onError
+
+onError allows decorating a function and execute a handler whenever an error is thrown (tryCatch block).
+Its default handler is to print the error and return NULL.
+
+```{r onerror}
+h <- onError(function(x) "1"-x)
+h(1)
+```
+
+Notice now how the h function happily returns NULL rather than an error.

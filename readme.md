@@ -1,0 +1,2 @@
+This package implements a subset of q verbs/adverbs in pure R. For reference, please check [https://code.kx.com/v2/ref/].
+This is not trying to compete with q, this is mainly a personal DSL for keeping the same kind of expressiveness when doing dataframes queries in R
