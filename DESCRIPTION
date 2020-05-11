@@ -4,7 +4,7 @@ Title: Functional Query Language
 Version: 4.0
 Date: 2019-08-26
 Author: JFP
-Maintainer: <jperrreton@gmail.com>
+Maintainer: <jperreton@gmail.com>
 Description: DSL for querying dataframes
 Depends: 
   functional (>= 0.6),
