@@ -9,7 +9,7 @@ update <-  function (d, where = NULL, by = NULL, what = NULL)
     return(d)
   if (nrow(d) == 0) 
     return(d)
-  base <- parent.frame(4)
+  base <- parent.frame()
   if ((length(where) == 0) | is.null(where)) {
     where <- list(rep(TRUE, nrow(d)))
   }
