@@ -1,6 +1,6 @@
 
 select <- function (d, where = NULL, by = NULL, what = NULL) {
-  base <- parent.frame(4)
+  base <- parent.frame()
   if ((length(where) == 0) | is.null(where)) {
     where <- list(rep(TRUE, nrow(d)))
   }
