@@ -45,7 +45,6 @@ select <- function (d, where = NULL, by = NULL, what = NULL) {
     what            <- what[!(as.character(what) %>% duplicated())]
   }
   r <- r %>%
-    (function(x) x[!grepl("NA", rownames(x)), ]) %>%
     (function(x) data.frame(lapply(bye, function(y) eval(y, env = x, enclos = base)), stringsAsFactors = FALSE)) %>% 
     xgroup(names(by)) %>%
     each(function(x) data.frame(lapply(what, function(y) eval(y, env = x, enclos = base)), stringsAsFactors = FALSE)) %>% 
