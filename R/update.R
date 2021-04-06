@@ -1,6 +1,6 @@
 recycle <- function(x, cols, base) {
   l     <- lapply(cols, function(y) eval(y, env = x, enclos = base))
-  data.frame(l)
+  data.frame(l, stringsAsFactors = FALSE)
 }
 
 update <-  function (d, where = NULL, by = NULL, what = NULL) 
